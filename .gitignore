@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# 数据文件（大文件不上传）
+data/raw/*.csv
+data/raw/*.pkl
+data/processed/*.csv
+data/processed/*.pkl
+data/qlib_data/
+*.h5
+*.hdf5
+
+# 模型文件（大文件不上传）
+model/*.pkl
+model/*.h5
+model/*.pth
+model/*.onnx
+
+# 回测结果
+backtest_result/*.html
+backtest_result/*.png
+backtest_result/*.pdf
+
+# 选股结果（可选，如不想上传）
+# selected_stocks/*.csv
+
+# 日志
+*.log
+logs/
+
+# 环境变量（敏感信息）
+.env
+.env.local
+
+# API Keys（绝对不要上传）
+*api_key*
+*apikey*
+*secret*
+*token*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 临时文件
+tmp/
+temp/
+*.tmp

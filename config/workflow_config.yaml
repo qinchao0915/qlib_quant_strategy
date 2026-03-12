@@ -1,0 +1,52 @@
+# Qlib 量化工作流配置
+
+data:
+  # Tushare API Token
+  tushare_token: "5c77554d043c48763fa73d12051d5e62ccee9056f8bf3498b208beaf"
+  
+  # 数据缓存路径
+  cache_path: "data/cache"
+  
+  # 数据时间范围
+  train_start: "2020-01-01"
+  train_end: "2024-08-31"
+  valid_start: "2024-09-01"
+  valid_end: "2025-08-31"
+  
+  # 股票池
+  market: "csi500"  # 可选: csi300, csi500, csi1000
+
+output:
+  # 模型保存目录
+  model_dir: "results"
+  
+  # 回测结果目录
+  backtest_dir: "backtest_result"
+  
+  # 选股结果目录
+  selection_dir: "selected_stocks"
+
+model:
+  # 模型类型
+  model_type: "lightgbm"  # 可选: lightgbm, xgboost
+  
+  # LightGBM 参数
+  lightgbm_params:
+    objective: "regression"
+    metric: "mse"
+    boosting_type: "gbdt"
+    num_leaves: 31
+    learning_rate: 0.05
+    feature_fraction: 0.8
+    bagging_fraction: 0.8
+    bagging_freq: 5
+    verbose: -1
+    
+  # XGBoost 参数（备用）
+  xgboost_params:
+    objective: "reg:squarederror"
+    eval_metric: "rmse"
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
