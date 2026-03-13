@@ -6,10 +6,33 @@ AI 助手 - 直接调用百炼 API
 
 from openai import OpenAI
 import sys
+import os
+
+# 从环境变量读取 API Key
+DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY")
+
+if not DASHSCOPE_API_KEY:
+    # 尝试从 API_KEYS.md 读取
+    api_keys_path = "/home/node/.openclaw/workspace/API_KEYS.md"
+    try:
+        with open(api_keys_path) as f:
+            content = f.read()
+            # 提取 API Key
+            import re
+            match = re.search(r'API Key.*`([^`]+)`', content)
+            if match:
+                DASHSCOPE_API_KEY = match.group(1)
+    except Exception:
+        pass
+
+if not DASHSCOPE_API_KEY:
+    print("❌ 错误: 找不到 DASHSCOPE_API_KEY")
+    print("请设置环境变量: export DASHSCOPE_API_KEY=sk-...")
+    sys.exit(1)
 
 # 配置百炼 API
 client = OpenAI(
-    api_key="sk-sp-5097f48f3f5e458dbf6f563049aba1fc",
+    api_key=DASHSCOPE_API_KEY,
     base_url="https://coding.dashscope.aliyuncs.com/v1"
 )
 

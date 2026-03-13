@@ -1,0 +1,45 @@
+#!/bin/bash
+# Claude Code with 百炼 (Bailian) 配置
+# 参考: https://help.aliyun.com/zh/model-studio/claude-code
+
+# 从 API_KEYS.md 读取配置
+WORKSPACE_DIR="$(cd "$(dirname "$0")" && pwd)"
+API_KEYS_FILE="/home/node/.openclaw/workspace/API_KEYS.md"
+
+if [ -f "$API_KEYS_FILE" ]; then
+    # 提取 API Key
+    ANTHROPIC_AUTH_TOKEN=$(grep -A 5 "## 阿里云百炼大模型" "$API_KEYS_FILE" | grep "API Key" | sed 's/.*`\([^`]*\)`.*/\1/')
+    
+    if [ -z "$ANTHROPIC_AUTH_TOKEN" ]; then
+        echo "❌ 错误: 无法从 API_KEYS.md 读取 API Key"
+        echo "请检查 $API_KEYS_FILE 文件是否存在且格式正确"
+        exit 1
+    fi
+else
+    echo "❌ 错误: 找不到 API_KEYS.md 文件"
+    echo "请确认文件位置: $API_KEYS_FILE"
+    exit 1
+fi
+
+# 百炼平台配置
+export ANTHROPIC_BASE_URL="https://dashscope.aliyuncs.com/apps/anthropic"
+export ANTHROPIC_AUTH_TOKEN
+export ANTHROPIC_MODEL="qwen3.5-plus"
+
+# 可选：按任务类型配置不同模型
+export ANTHROPIC_DEFAULT_OPUS_MODEL="qwen3.5-plus"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="qwen3.5-plus"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="qwen3-coder-next"
+
+echo "🚀 Starting Claude Code with 百炼 (Bailian)..."
+echo "API Base: $ANTHROPIC_BASE_URL"
+echo "Model: $ANTHROPIC_MODEL"
+echo ""
+
+# 检查并创建 .claude.json 跳过登录
+if [ ! -f ~/.claude.json ]; then
+    echo '{"hasCompletedOnboarding": true}' > ~/.claude.json
+    echo "✅ 已配置跳过登录"
+fi
+
+exec /home/node/.local/bin/claude "$@"

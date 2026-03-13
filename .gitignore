@@ -101,3 +101,5 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+.claude.json
+ai_helper_local.py

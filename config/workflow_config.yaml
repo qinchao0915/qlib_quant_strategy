@@ -2,7 +2,8 @@
 
 data:
   # Tushare API Token
-  tushare_token: "5c77554d043c48763fa73d12051d5e62ccee9056f8bf3498b208beaf"
+  # 从环境变量读取: export TUSHARE_TOKEN=xxx
+  tushare_token: "${TUSHARE_TOKEN}"
   
   # 数据缓存路径
   cache_path: "data/cache"
