@@ -38,19 +38,38 @@ env/
 *.ipynb
 
 # 数据文件（大文件不上传）
-data/raw/*.csv
-data/raw/*.pkl
-data/processed/*.csv
-data/processed/*.pkl
+# 所有数据缓存文件
+data/
+data/cache/
+data/raw/
+data/processed/
 data/qlib_data/
+*.csv
+*.pkl
 *.h5
 *.hdf5
+*.parquet
+*.feather
+*.db
+*.sqlite
+*.sqlite3
 
-# 模型文件（大文件不上传）
-model/*.pkl
-model/*.h5
-model/*.pth
-model/*.onnx
+# 训练数据（特别大）
+data/cache/*.pkl
+data/cache/daily_*.pkl
+data/cache/stock_list_*.pkl
+
+# 模型文件（可以上传，用于共享训练好的模型）
+# model/*.pkl
+# model/*.h5
+# model/*.pth
+# model/*.onnx
+
+# 但忽略临时模型和超大模型（>100MB）
+model/temp_*
+model/*.tmp
+model/checkpoint_*
+model/*.ckpt
 
 # 回测结果
 backtest_result/*.html
