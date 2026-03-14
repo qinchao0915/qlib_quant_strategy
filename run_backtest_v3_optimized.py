@@ -162,51 +162,24 @@ def backtest_v3_optimized():
                     })
                     del positions[symbol]
         
-        # ===== 3. 检查持仓到期（严格>=5天）=====
-        for symbol, pos in list(positions.items()):
-            days_held = (today - pos['buy_date']).days
-            
-            # 严格>=5天才允许卖出
-            if days_held >= HOLDING_DAYS:
-                stock_tomorrow = tomorrow_df[tomorrow_df['symbol'] == symbol]
-                if len(stock_tomorrow) > 0:
-                    sell_price = stock_tomorrow['open'].values[0] * (1 - COST_RATE)
-                    ret = (sell_price / pos['buy_price']) - 1
-                    stock_name = stock_tomorrow['stock_name'].values[0]
-                    
-                    trades.append({
-                        'trade_date': tomorrow.strftime('%Y-%m-%d'),
-                        'signal_date': today.strftime('%Y-%m-%d'),
-                        'symbol': symbol,
-                        'stock_name': stock_name,
-                        'buy_price': pos['buy_price'],
-                        'sell_price': sell_price,
-                        'return': ret,
-                        'holding_days': days_held,
-                        'buy_signal': f'预测得分{pos["pred"]:.6f}',
-                        'sell_signal': '持仓到期',
-                        'pred_score': pos['pred']
-                    })
-                    del positions[symbol]
-        
-        # ===== 4. 大盘择时：判断是否可以开仓 =====
+        # ===== 3. 大盘择时：判断是否可以开仓 =====
         can_open = calculate_market_trend(df, today)
         
         if not can_open:
             print(f"  {today.strftime('%Y-%m-%d')}: 大盘空头，停止开仓")
         
-        # ===== 5. 换手惩罚：决定保留哪些持仓 =====
+        # ===== 4. 持仓到期与换手惩罚（合并逻辑）=====
         # 获取今日所有股票的预测得分排名
         today_df_sorted = today_df.sort_values('pred', ascending=False)
         n_total = len(today_df_sorted)
         
-        # 保留持仓条件：当前得分在前15%
+        # 保留持仓阈值：当前得分在前15%
         keep_threshold_idx = int(n_total * TOP_PCT_KEEP)
         keep_threshold_score = today_df_sorted.iloc[keep_threshold_idx]['pred'] if keep_threshold_idx < n_total else today_df_sorted['pred'].min()
         
-        # 检查现有持仓是否需要卖出（未触发止损/到期的情况下）
+        # 检查持仓是否到期或需要换仓
         for symbol, pos in list(positions.items()):
-            # 如果已经触发止损或到期，上面已经处理了
+            # 如果已经触发止损，上面已经处理了
             if symbol not in positions:
                 continue
             
@@ -217,29 +190,34 @@ def backtest_v3_optimized():
             current_pred = stock_today['pred'].values[0]
             days_held = (today - pos['buy_date']).days
             
-            # 换手惩罚：持仓满5天后，如果得分掉出前15%，则卖出换仓
-            # 不满5天的持仓不因为排名下降而卖出（严格持仓）
-            if days_held >= HOLDING_DAYS and current_pred < keep_threshold_score:
+            # 只有持仓满5天才检查是否卖出
+            if days_held >= HOLDING_DAYS:
                 stock_tomorrow = tomorrow_df[tomorrow_df['symbol'] == symbol]
                 if len(stock_tomorrow) > 0:
                     sell_price = stock_tomorrow['open'].values[0] * (1 - COST_RATE)
                     ret = (sell_price / pos['buy_price']) - 1
                     stock_name = stock_tomorrow['stock_name'].values[0]
                     
-                    trades.append({
-                        'trade_date': tomorrow.strftime('%Y-%m-%d'),
-                        'signal_date': today.strftime('%Y-%m-%d'),
-                        'symbol': symbol,
-                        'stock_name': stock_name,
-                        'buy_price': pos['buy_price'],
-                        'sell_price': sell_price,
-                        'return': ret,
-                        'holding_days': days_held,
-                        'buy_signal': f'预测得分{pos["pred"]:.6f}',
-                        'sell_signal': '排名下降(换仓)',
-                        'pred_score': pos['pred']
-                    })
-                    del positions[symbol]
+                    # 判断卖出原因：排名在前15%则继续持有，否则换仓
+                    if current_pred >= keep_threshold_score:
+                        # 排名在前15%，继续持有（不卖出）
+                        continue
+                    else:
+                        # 排名跌出前15%，触发换仓
+                        trades.append({
+                            'trade_date': tomorrow.strftime('%Y-%m-%d'),
+                            'signal_date': today.strftime('%Y-%m-%d'),
+                            'symbol': symbol,
+                            'stock_name': stock_name,
+                            'buy_price': pos['buy_price'],
+                            'sell_price': sell_price,
+                            'return': ret,
+                            'holding_days': days_held,
+                            'buy_signal': f'预测得分{pos["pred"]:.6f}',
+                            'sell_signal': '排名下降(换仓)',
+                            'pred_score': pos['pred']
+                        })
+                        del positions[symbol]
         
         # ===== 6. 买入新股票（仅在允许开仓时）=====
         if can_open:
