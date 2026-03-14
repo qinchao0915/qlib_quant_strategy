@@ -1,0 +1,17 @@
+{
+  "version": "v3_optimized",
+  "model": "v2",
+  "total_trades": 3347,
+  "avg_return": 0.005609205908620844,
+  "win_rate": 0.48102778607708396,
+  "annual_return_gross": 0.3375822731345999,
+  "annual_cost": 0.1352,
+  "annual_return_net": 0.2023822731345999,
+  "avg_holding_days": 5.551239916342993,
+  "features": [
+    "strict_holding_5d",
+    "ma20_ma60_filter",
+    "trailing_stop_8pct",
+    "top15_keep"
+  ]
+}
